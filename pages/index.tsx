@@ -1,5 +1,5 @@
 import type { NextPage } from 'next'
-import React, { Component, createElement, FC, ReactElement, ReactNode, ReactPortal, useEffect, useState } from 'react'
+import React, { cloneElement, Component, createElement, FC, ReactElement, ReactNode, ReactPortal, useEffect, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid';
 
 interface GeneralComponent {
@@ -7,11 +7,10 @@ interface GeneralComponent {
 }
 
 interface ContainerInteface {
-  id: any,
   wrappers: any[],
   gap?: number
 }
-const Container = ({ id, wrappers, gap = 5 }: ContainerInteface) => {
+const Container = ({ wrappers, gap = 5 }: ContainerInteface) => {
   const gaps: any = {
     1: 'gap-1',
     2: 'gap-2',
@@ -63,7 +62,17 @@ const Button1 = ({ adsa }: Test123): ReactElement => {
   return <div>asda</div>;
 }
 
-const Home: NextPage<{ ChoosenLayout: any, config: any }> = ({ ChoosenLayout, config }) => {
+interface configurationProvider {
+  children: ReactElement,
+  config: object,
+  configId: string,
+};
+
+const propsProvider = (config: {[key: string]: any }, configId: string) => {
+  return config[configId];
+}
+
+const Home: NextPage<{ ChoosenLayout: any, config: any }> = ({ config }) => {
   // config should be keep on state
   // config will be editable by forms
   return (
@@ -74,24 +83,22 @@ const Home: NextPage<{ ChoosenLayout: any, config: any }> = ({ ChoosenLayout, co
       <main className="mt-5 mb-5">
         <div className="flex flex-col">
           <div>
-            <Container id="top-bar" wrappers={[]} />
+            <Container {...propsProvider(config, 'top-bar')} />
           </div>
           {/* <DynamicContainer id="top-baner-coś-tam"></DynamicContainer> */}
           <div className="flex">
             <div className="w-2/3 border">
-              <Container id="left-column" gap={5} wrappers={[
-                <Wrapper id="wrapper1" key={uuidv4()} padding={3}>
+              <Container gap={5} wrappers={[
+                <Wrapper {...propsProvider(config, 'wrapper1')} key={uuidv4()}>
                   <Button name={'test123'} />
                 </Wrapper>,
                 <Wrapper id="wrapper2" key={uuidv4()}>
                   <Button1 adsa={'asdsa'} />
                 </Wrapper>,
-                // <Wrapper Component={<Button />} />,
-                // <Wrapper Component={<Button />} />
               ]} />
             </div>
             <div className="w-1/3 border">
-              <Container id="side-bar" wrappers={[]} />
+              <Container wrappers={[]} />
             </div>
           </div>
         </div>
@@ -104,9 +111,11 @@ const Home: NextPage<{ ChoosenLayout: any, config: any }> = ({ ChoosenLayout, co
 }
 
 export async function getStaticProps(context: any) {
-  const ChoosenLayout = 'Layout1';
   // prototype
   const config = {
+    'top-bar': {
+      wrappers: []
+    },
     finalLayout: {
       type: 'layout',
       props: {
@@ -122,12 +131,8 @@ export async function getStaticProps(context: any) {
         ],
       },
     },
-    wrapperId: {
-      type: 'wrapper',
-      props: {
-        padding: 'asda',
-        component: 'superComponentId',
-      }
+    wrapper1: {
+      padding: 3
     },
     superComponentId: {
       type: 'component',
@@ -139,7 +144,6 @@ export async function getStaticProps(context: any) {
   };
   return {
     props: {
-      ChoosenLayout: ChoosenLayout,
       config: config
     }, // will be passed to the page component as props
   }
