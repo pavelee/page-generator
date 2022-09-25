@@ -360,6 +360,17 @@ const Home: NextPage<{ editable: any, config: any }> = ({ config }) => {
                 </div>
               </div>
               <Container componentId={'main'} getProp={getProp} setProp={setProp} propsProvider={propsProvider} {...propsProvider('main')} />
+              <div className="card m-5 bg-base-100 shadow-xl image-full">
+                <figure><img src="https://placeimg.com/1200/300/arch" alt="Shoes" /></figure>
+                <div className="card-body">
+                  <h2 className="card-title">Konto testowe!</h2>
+                  <p>Przetestuj stronę przez 48h!</p>
+                  <div className="card-actions justify-end">
+                    <button className="btn btn-primary">Sprawdź</button>
+                  </div>
+                </div>
+              </div>
+              <Container componentId={'main1'} getProp={getProp} setProp={setProp} propsProvider={propsProvider} {...propsProvider('main1')} />
             </div>
             <div className="w-1/3 border space-y-3">
               <div className="card m-5 bg-base-100 shadow-xl image-full">
@@ -395,6 +406,11 @@ const Home: NextPage<{ editable: any, config: any }> = ({ config }) => {
 const useConfig = () => {
   const config = { // config 
     "main": {
+      gap: 5,
+      direction: 1,
+      components: [],
+    },
+    "main1": {
       gap: 5,
       direction: 1,
       components: [],
