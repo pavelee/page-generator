@@ -262,9 +262,9 @@ const Stats = () => {
   return (
     <div className="stats shadow flex justify-center items-center">
       <div className="stat">
-        <div className="stat-title">Total Page Views</div>
-        <div className="stat-value">89,400</div>
-        <div className="stat-desc">21% more than last month</div>
+        <div className="stat-title">Bestseller!</div>
+        <div className="stat-value">100.000</div>
+        <div className="stat-desc">21% rynku</div>
       </div>
     </div>
   )
@@ -378,9 +378,6 @@ const Home: NextPage<{ editable: any, config: any }> = ({ config }) => {
                 <div className="card-body">
                   <h2 className="card-title">Przykładowe miejsce reklamy</h2>
                   <p>A co byś powiedział na...</p>
-                  <div className="card-actions justify-end">
-                    <button className="btn btn-primary">Zobacz!</button>
-                  </div>
                 </div>
               </div>
               <Container componentId={'sidebar1'} getProp={getProp} setProp={setProp} propsProvider={propsProvider} {...propsProvider('sidebar1')} />
