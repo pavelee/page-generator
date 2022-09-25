@@ -374,7 +374,7 @@ const Home: NextPage<{ editable: any, config: any }> = ({ config }) => {
             </div>
             <div className="w-1/3 border space-y-3">
               <div className="card m-5 bg-base-100 shadow-xl image-full">
-                <figure><img src="https://placeimg.com/400/225/arch" alt="Shoes" /></figure>
+                <figure><img src="https://placeimg.com/1200/300/arch" alt="Shoes" /></figure>
                 <div className="card-body">
                   <h2 className="card-title">Nowe Wydanie!</h2>
                   <p>Zoabcz co nowego!</p>
@@ -385,7 +385,7 @@ const Home: NextPage<{ editable: any, config: any }> = ({ config }) => {
               </div>
               <Container componentId={'sidebar'} getProp={getProp} setProp={setProp} propsProvider={propsProvider} {...propsProvider('sidebar')} />
               <div className="card card-compact m-5 bg-base-100 shadow-xl">
-                <figure><img src="https://placeimg.com/400/225/arch" alt="Shoes" /></figure>
+                <figure><img src="https://placeimg.com/1200/800/arch" alt="Shoes" /></figure>
                 <div className="card-body">
                   <h2 className="card-title">Przykładowe miejsce reklamy</h2>
                   <p>A co byś powiedział na...</p>
