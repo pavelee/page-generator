@@ -1,5 +1,5 @@
 import type { NextPage } from 'next'
-import React, { cloneElement, Component, createElement, FC, ReactElement, ReactNode, ReactPortal, useEffect, useState } from 'react'
+import React, { cloneElement, Component, createElement, FC, ReactElement, ReactNode, ReactPortal, useDebugValue, useEffect, useReducer, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid';
 import { AiOutlineTool } from 'react-icons/ai';
 
@@ -276,66 +276,95 @@ interface configurationProvider {
   configId: string,
 };
 
-const UseForm = (config: any) => {
-  const [conf, setConf] = useState(config);
-  const translatedPropsProvider = (configId: string) => {
-    let realComponents: any[] = [];
-    let config = propsProvider(configId);
-    // if ('components' in config) {
-    //   config.components.map((component: any)  => {
-    //     if (component.component === 'Wrapper') {
-    //       console.log('tutaj', translatedPropsProvider(component.componentId));
-    //       realComponents.push(<Wrapper componentId={component.componentId} setProp={setProp} getProp={getProp} {...translatedPropsProvider(component.componentId)} />);
-    //     }
-    //   })
-    // }
-    // config.components = realComponents;
-    return config;
-  }
+const UseForm = (config: any, dispatch: any) => {
+  // const [conf, setConf] = useState(config);
   const propsProvider = (configId: string) => {
-    if (configId in conf) {
-      return conf[configId];
+    if (configId in config) {
+      return config[configId];
     }
     return {}
   }
-  const getConfig = () => {
-    return conf;
-  }
   const getProp = (id: string, key: string) => {
-    if (id in conf) {
-      return conf[id][key];
+    if (id in config) {
+      return config[id][key];
     }
     return null;
   }
+  // const setProp = (id: string, key: string, value: string) => {
+  //   let ap = propsProvider(id);
+  //   if (!ap) {
+  //     ap[id] = {};
+  //   }
+  //   if (key in ap === false) {
+  //     ap[key] = value;
+  //   }
+  //   setConf(
+  //     Object.assign({}, conf, {
+  //       [id]: {
+  //         ...ap,
+  //         [key]: Array.isArray(ap[key]) ? [...ap[key], value] : value
+  //       }
+  //     })
+  //   );
+  // }
   const setProp = (id: string, key: string, value: string) => {
-    let ap = propsProvider(id);
-    if (!ap) {
-      ap[id] = {};
-    }
-    if (key in ap === false) {
-      ap[key] = value;
-    }
-    setConf(
-      Object.assign({}, conf, {
-        [id]: {
-          ...ap,
-          [key]: Array.isArray(ap[key]) ? [...ap[key], value] : value
-        }
-      })
-    );
+    dispatch({
+      type: 'setProp',
+      id: id,
+      key: key,
+      value: value
+    })
+    // let ap = propsProvider(id);
+    // if (!ap) {
+    //   ap[id] = {};
+    // }
+    // if (key in ap === false) {
+    //   ap[key] = value;
+    // }
+    // setConf(
+    //   Object.assign({}, conf, {
+    //     [id]: {
+    //       ...ap,
+    //       [key]: Array.isArray(ap[key]) ? [...ap[key], value] : value
+    //     }
+    //   })
+    // );
   }
 
   return {
-    translatedPropsProvider,
     propsProvider,
-    getConfig,
     getProp,
     setProp
   }
 }
 
+const configReducer = (state: any, action: any) => {
+  switch (action.type) {
+    case 'setProp':
+      console.log('setProp reducer');
+      // if id dosent exists, create it
+      if (action.id in state === false) {
+        state[action.id] = {};
+      }
+      let ap = state[action.id][action.key];
+      // if component config dosent have key, create it
+      // if (key in ap === false) {
+      //   ap[key] = value;
+      // }
+      return {
+        ...state,
+        [action.id]: {
+          ...state[action.id],
+          [action.key]: action.value
+        }
+      };
+  }
+}
+
 const Home: NextPage<{ editable: any, config: any }> = ({ config }) => {
-  const { getConfig, getProp, setProp, propsProvider, translatedPropsProvider } = UseForm(config);
+  console.log('RENDERUJE HOME!');
+  const [state, dispatch] = useReducer(configReducer, config);
+  const { getProp, setProp, propsProvider } = UseForm(state, dispatch);
   // config should be keep on state
   // config will be editable by forms
   return (
@@ -359,7 +388,7 @@ const Home: NextPage<{ editable: any, config: any }> = ({ config }) => {
                   </div>
                 </div>
               </div>
-              <Container componentId={'main'} getProp={getProp} setProp={setProp} propsProvider={propsProvider} {...propsProvider('main')} />
+              {/* <Container componentId={'main'} getProp={getProp} setProp={setProp} propsProvider={propsProvider} {...propsProvider('main')} /> */}
               <div className="card m-5 bg-base-100 shadow-xl image-full">
                 <figure><img src="https://placeimg.com/1200/300/arch" alt="Shoes" /></figure>
                 <div className="card-body">
@@ -370,7 +399,7 @@ const Home: NextPage<{ editable: any, config: any }> = ({ config }) => {
                   </div>
                 </div>
               </div>
-              <Container componentId={'main1'} getProp={getProp} setProp={setProp} propsProvider={propsProvider} {...propsProvider('main1')} />
+              {/* <Container componentId={'main1'} getProp={getProp} setProp={setProp} propsProvider={propsProvider} {...propsProvider('main1')} /> */}
             </div>
             <div className="w-1/3 border space-y-3">
               <div className="card m-5 bg-base-100 shadow-xl image-full">
@@ -383,7 +412,7 @@ const Home: NextPage<{ editable: any, config: any }> = ({ config }) => {
                   </div>
                 </div>
               </div>
-              <Container componentId={'sidebar'} getProp={getProp} setProp={setProp} propsProvider={propsProvider} {...propsProvider('sidebar')} />
+              <Container componentId={'sidebar'} getProp={getProp} setProp={setProp} propsProvider={propsProvider} {...state['sidebar']} />
               <div className="card card-compact m-5 bg-base-100 shadow-xl">
                 <figure><img src="https://placeimg.com/1200/800/arch" alt="Shoes" /></figure>
                 <div className="card-body">
@@ -391,7 +420,7 @@ const Home: NextPage<{ editable: any, config: any }> = ({ config }) => {
                   <p>A co byś powiedział na...</p>
                 </div>
               </div>
-              <Container componentId={'sidebar1'} getProp={getProp} setProp={setProp} propsProvider={propsProvider} {...propsProvider('sidebar1')} />
+              {/* <Container componentId={'sidebar1'} getProp={getProp} setProp={setProp} propsProvider={propsProvider} {...propsProvider('sidebar1')} /> */}
             </div>
           </div>
         </div>
