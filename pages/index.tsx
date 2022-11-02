@@ -1,5 +1,5 @@
 import type { NextPage } from 'next'
-import React, { cloneElement, Component, createElement, FC, ReactElement, ReactNode, ReactPortal, useDebugValue, useEffect, useReducer, useState } from 'react'
+import React, { cloneElement, Component, createContext, createElement, FC, ReactElement, ReactNode, ReactPortal, useContext, useDebugValue, useEffect, useReducer, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid';
 import { AiOutlineTool } from 'react-icons/ai';
 
@@ -14,7 +14,11 @@ const transformComponents = (components: any[], setProp: any, getProp: any, prop
   return realComponents;
 }
 
-const transformComponent = (component: any, setProp: any, getProp: any, propsProvider: any) => {
+const transformComponent = (component: any) => {
+  const cc = useContext(ConfigContext);
+  const setProp = cc.setProp;
+  const getProp = cc.getProp;
+  const propsProvider = cc.getProps;
   if (component.component === 'Wrapper') {
     // console.log('tutaj', translatedPropsProvider(component.componentId));
     return <Wrapper componentId={component.componentId} setProp={setProp} getProp={getProp} propsProvider={propsProvider} {...propsProvider(component.componentId)} />;
@@ -30,7 +34,11 @@ const transformComponent = (component: any, setProp: any, getProp: any, propsPro
   return <div>NOT FOUND</div>
 }
 
-const FormFactory = (formComponent: any, componentId: any, setProp: any, getProp: any) => {
+const FormFactory = (formComponent: any, componentId: any) => {
+  const cc = useContext(ConfigContext);
+  const setProp = cc.setProp;
+  const getProp = cc.getProp;
+  const propsProvider = cc.getProps;
   if (formComponent === 'ButtonForm') {
     return <ButtonForm componentId={componentId} setProp={setProp} getProp={getProp} />
   }
@@ -44,7 +52,10 @@ interface GeneralComponent {
   id: string,
 }
 
-const ContainerForm = ({ componentId, setProp, getProp }: { componentId: string, setProp: any, getProp: any }) => {
+const ContainerForm = ({ componentId }: { componentId: string }) => {
+  const cc = useContext(ConfigContext);
+  const setProp = cc.setProp;
+  const getProp = cc.getProp;
   return (
     <div className="space-y-3">
       <div className="form-control">
@@ -102,7 +113,9 @@ interface ContainerInteface {
   gap?: number
   direction?: number
 }
-const Container = ({ componentId, components, getProp, setProp, propsProvider, gap = 5, direction = 1 }: ContainerInteface) => {
+const Container = ({ componentId, components, gap = 5, direction = 1 }: ContainerInteface) => {
+  const cc = useContext(ConfigContext);
+  const [isOpen, setIsOpen] = useState(false);
   const gaps: any = {
     1: 'gap-1',
     2: 'gap-2',
@@ -117,13 +130,15 @@ const Container = ({ componentId, components, getProp, setProp, propsProvider, g
 
   return (
     <EditWrapper
-      form={<ContainerForm componentId={componentId} setProp={setProp} getProp={getProp} />}
+      form={<ContainerForm componentId={componentId} />}
+      isOpen={isOpen}
+      setIsOpen={setIsOpen}
     >
       <div className={`flex flex-wrap ${gaps[gap]} ${directions[direction]}`}>
         {
           components.map((component: any) => {
-            return (<div key={uuidv4()}>
-              {transformComponent(component, setProp, getProp, propsProvider)}
+            return (<div key={component.componentId}>
+              {transformComponent(component)}
             </div>)
           })
         }
@@ -145,8 +160,8 @@ const Modal = ({ isOpen = false, setIsOpen, children }: { isOpen: Boolean, setIs
   )
 }
 
-const EditWrapper = ({ children, form }: { children: any, form?: any }) => {
-  const [isOpen, setIsOpen] = useState(false);
+const EditWrapper = ({ children, form, isOpen = false, setIsOpen }: { children: any, form?: any, isOpen: any, setIsOpen: any }) => {
+  // const [isOpen, setIsOpen] = useState(false);
   return (
     <div className="relative hover:pt-5">
       <button className="btn-xs absolute top-0" onClick={() => { setIsOpen(!isOpen) }}><AiOutlineTool /></button>
@@ -158,7 +173,10 @@ const EditWrapper = ({ children, form }: { children: any, form?: any }) => {
   );
 }
 
-const WrapperForm = ({ componentId, setProp, getProp }: { componentId: string, setProp: any, getProp: any }) => {
+const WrapperForm = ({ componentId }: { componentId: string }) => {
+  const cc = useContext(ConfigContext);
+  const setProp = cc.setProp;
+  const getProp = cc.getProp;
   return (
     <div>
       <div className="form-control">
@@ -187,7 +205,12 @@ interface WrapperInterface extends GeneralComponent {
   propsProvider: any,
   padding?: number,
 }
-const Wrapper = ({ componentId, component, componentForm, getProp, setProp, propsProvider, padding = 3 }: WrapperInterface) => {
+const Wrapper = ({ componentId, component, componentForm, padding = 3 }: WrapperInterface) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const cc = useContext(ConfigContext);
+  const setProp = cc.setProp;
+  const getProp = cc.getProp;
+  const propsProvider = cc.getProps;
   const paddings: any = {
     0: 'p-0',
     1: 'p-1',
@@ -197,13 +220,17 @@ const Wrapper = ({ componentId, component, componentForm, getProp, setProp, prop
   return (
     <EditWrapper
       form={<WrapperForm componentId={componentId} getProp={getProp} setProp={setProp} />}
+      isOpen={isOpen}
+      setIsOpen={setIsOpen}
     >
       <div className={`${paddings[padding]}`}>
         {
           component && <EditWrapper
-            form={FormFactory(component.form, component.componentId, setProp, getProp)}
+            form={FormFactory(component.form, component.componentId)}
+            isOpen={isOpen}
+            setIsOpen={setIsOpen}
           >
-            {transformComponent(component, setProp, getProp, propsProvider)}
+            {transformComponent(component)}
           </EditWrapper>
         }
       </div>
@@ -254,7 +281,10 @@ const Button = ({ text, type }: PageComponentProps & ButtonComponentInterface): 
   </div>
 }
 
-const StatsForm = ({ componentId, setProp, getProp }: { componentId: string, setProp: any, getProp: any }) => {
+const StatsForm = ({ componentId }: { componentId: string }) => {
+  const cc = useContext(ConfigContext);
+  const setProp = cc.setProp;
+  const getProp = cc.getProp;
   return <></>
 }
 
@@ -277,7 +307,6 @@ interface configurationProvider {
 };
 
 const UseForm = (config: any, dispatch: any) => {
-  // const [conf, setConf] = useState(config);
   const propsProvider = (configId: string) => {
     if (configId in config) {
       return config[configId];
@@ -290,23 +319,6 @@ const UseForm = (config: any, dispatch: any) => {
     }
     return null;
   }
-  // const setProp = (id: string, key: string, value: string) => {
-  //   let ap = propsProvider(id);
-  //   if (!ap) {
-  //     ap[id] = {};
-  //   }
-  //   if (key in ap === false) {
-  //     ap[key] = value;
-  //   }
-  //   setConf(
-  //     Object.assign({}, conf, {
-  //       [id]: {
-  //         ...ap,
-  //         [key]: Array.isArray(ap[key]) ? [...ap[key], value] : value
-  //       }
-  //     })
-  //   );
-  // }
   const setProp = (id: string, key: string, value: string) => {
     dispatch({
       type: 'setProp',
@@ -314,27 +326,12 @@ const UseForm = (config: any, dispatch: any) => {
       key: key,
       value: value
     })
-    // let ap = propsProvider(id);
-    // if (!ap) {
-    //   ap[id] = {};
-    // }
-    // if (key in ap === false) {
-    //   ap[key] = value;
-    // }
-    // setConf(
-    //   Object.assign({}, conf, {
-    //     [id]: {
-    //       ...ap,
-    //       [key]: Array.isArray(ap[key]) ? [...ap[key], value] : value
-    //     }
-    //   })
-    // );
   }
 
   return {
     propsProvider,
     getProp,
-    setProp
+    setProp,
   }
 }
 
@@ -361,6 +358,13 @@ const configReducer = (state: any, action: any) => {
   }
 }
 
+const ConfigContext = createContext({
+  config: {},
+  getProp: () => { },
+  setProp: () => { },
+  getProps: () => { },
+})
+
 const Home: NextPage<{ editable: any, config: any }> = ({ config }) => {
   console.log('RENDERUJE HOME!');
   const [state, dispatch] = useReducer(configReducer, config);
@@ -368,67 +372,69 @@ const Home: NextPage<{ editable: any, config: any }> = ({ config }) => {
   // config should be keep on state
   // config will be editable by forms
   return (
-    <div className="container mx-auto h-screen bg-blue-500">
-      <header className="h-1/4 border">
-        Header, Layout1
-      </header>
-      <main className="">
-        <div className="flex flex-col">
-          <div>
-            {/* <Container {...propsProvider('top-bar')} /> */}
-          </div>
-          {/* <DynamicContainer id="top-baner-coś-tam"></DynamicContainer> */}
-          <div className="flex">
-            <div className="w-2/3 border">
-              <div className="p-3">
-                <div className="alert alert-info">
-                  <div>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                    <span>Twój abonment wygasa za X dni, przedłuż już teraz!</span>
-                  </div>
-                </div>
-              </div>
-              {/* <Container componentId={'main'} getProp={getProp} setProp={setProp} propsProvider={propsProvider} {...propsProvider('main')} /> */}
-              <div className="card m-5 bg-base-100 shadow-xl image-full">
-                <figure><img src="https://placeimg.com/1200/300/arch" alt="Shoes" /></figure>
-                <div className="card-body">
-                  <h2 className="card-title">Konto testowe!</h2>
-                  <p>Przetestuj stronę przez 48h!</p>
-                  <div className="card-actions justify-end">
-                    <button className="btn btn-primary">Sprawdź</button>
-                  </div>
-                </div>
-              </div>
-              {/* <Container componentId={'main1'} getProp={getProp} setProp={setProp} propsProvider={propsProvider} {...propsProvider('main1')} /> */}
+    <ConfigContext.Provider value={{ config: state, getProp: getProp, setProp: setProp, getProps: propsProvider }}>
+      <div className="container mx-auto h-screen bg-blue-500">
+        <header className="h-1/4 border">
+          Header, Layout1
+        </header>
+        <main className="">
+          <div className="flex flex-col">
+            <div>
+              {/* <Container {...propsProvider('top-bar')} /> */}
             </div>
-            <div className="w-1/3 border space-y-3">
-              <div className="card m-5 bg-base-100 shadow-xl image-full">
-                <figure><img src="https://placeimg.com/1200/300/arch" alt="Shoes" /></figure>
-                <div className="card-body">
-                  <h2 className="card-title">Nowe Wydanie!</h2>
-                  <p>Zoabcz co nowego!</p>
-                  <div className="card-actions justify-end">
-                    <button className="btn btn-primary">Sprawdź</button>
+            {/* <DynamicContainer id="top-baner-coś-tam"></DynamicContainer> */}
+            <div className="flex">
+              <div className="w-2/3 border">
+                <div className="p-3">
+                  <div className="alert alert-info">
+                    <div>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                      <span>Twój abonment wygasa za X dni, przedłuż już teraz!</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <Container componentId={'sidebar'} getProp={getProp} setProp={setProp} propsProvider={propsProvider} {...state['sidebar']} />
-              <div className="card card-compact m-5 bg-base-100 shadow-xl">
-                <figure><img src="https://placeimg.com/1200/800/arch" alt="Shoes" /></figure>
-                <div className="card-body">
-                  <h2 className="card-title">Przykładowe miejsce reklamy</h2>
-                  <p>A co byś powiedział na...</p>
+                <Container componentId={'main'} {...propsProvider('main')} />
+                <div className="card m-5 bg-base-100 shadow-xl image-full">
+                  <figure><img src="https://placeimg.com/1200/300/arch" alt="Shoes" /></figure>
+                  <div className="card-body">
+                    <h2 className="card-title">Konto testowe!</h2>
+                    <p>Przetestuj stronę przez 48h!</p>
+                    <div className="card-actions justify-end">
+                      <button className="btn btn-primary">Sprawdź</button>
+                    </div>
+                  </div>
                 </div>
+                <Container componentId={'main1'} {...propsProvider('main1')} />
               </div>
-              {/* <Container componentId={'sidebar1'} getProp={getProp} setProp={setProp} propsProvider={propsProvider} {...propsProvider('sidebar1')} /> */}
+              <div className="w-1/3 border space-y-3">
+                <div className="card m-5 bg-base-100 shadow-xl image-full">
+                  <figure><img src="https://placeimg.com/1200/300/arch" alt="Shoes" /></figure>
+                  <div className="card-body">
+                    <h2 className="card-title">Nowe Wydanie!</h2>
+                    <p>Zoabcz co nowego!</p>
+                    <div className="card-actions justify-end">
+                      <button className="btn btn-primary">Sprawdź</button>
+                    </div>
+                  </div>
+                </div>
+                <Container componentId={'sidebar'} {...state['sidebar']} />
+                <div className="card card-compact m-5 bg-base-100 shadow-xl">
+                  <figure><img src="https://placeimg.com/1200/800/arch" alt="Shoes" /></figure>
+                  <div className="card-body">
+                    <h2 className="card-title">Przykładowe miejsce reklamy</h2>
+                    <p>A co byś powiedział na...</p>
+                  </div>
+                </div>
+                <Container componentId={'sidebar1'} {...propsProvider('sidebar1')} />
+              </div>
             </div>
           </div>
-        </div>
-      </main>
-      <footer className="h-1/4 border">
-        footer
-      </footer>
-    </div>
+        </main>
+        <footer className="h-1/4 border">
+          footer
+        </footer>
+      </div>
+    </ConfigContext.Provider>
   )
 }
 
