@@ -20,15 +20,12 @@ const transformComponent = (component: any) => {
   const getProp = cc.getProp;
   const propsProvider = cc.getProps;
   if (component.component === 'Wrapper') {
-    // console.log('tutaj', translatedPropsProvider(component.componentId));
-    return <Wrapper componentId={component.componentId} setProp={setProp} getProp={getProp} propsProvider={propsProvider} {...propsProvider(component.componentId)} />;
+    return <Wrapper componentId={component.componentId} {...propsProvider(component.componentId)} />;
   }
   if (component.component === 'Button') {
-    // console.log('tutaj', translatedPropsProvider(component.componentId));
     return <Button {...propsProvider(component.componentId)} />;
   }
   if (component.component === 'Stats') {
-    // console.log('tutaj', translatedPropsProvider(component.componentId));
     return <Stats {...propsProvider(component.componentId)} />;
   }
   return <div>NOT FOUND</div>
@@ -40,10 +37,10 @@ const FormFactory = (formComponent: any, componentId: any) => {
   const getProp = cc.getProp;
   const propsProvider = cc.getProps;
   if (formComponent === 'ButtonForm') {
-    return <ButtonForm componentId={componentId} setProp={setProp} getProp={getProp} />
+    return <ButtonForm componentId={componentId} />
   }
   if (formComponent === 'StatsForm') {
-    return <StatsForm componentId={componentId} setProp={setProp} getProp={getProp} />
+    return <StatsForm componentId={componentId} />
   }
   return <div>NOT FOUND</div>
 }
@@ -242,7 +239,10 @@ interface PageComponentProps {
   text: string
 }
 
-const ButtonForm = ({ componentId, setProp, getProp }: { componentId: string, setProp: any, getProp: any }) => {
+const ButtonForm = ({ componentId }: { componentId: string }) => {
+  const cc = useContext(ConfigContext);
+  const setProp = cc.setProp;
+  const getProp = cc.getProp;
   return (
     <div>
       <div className="form-control">
